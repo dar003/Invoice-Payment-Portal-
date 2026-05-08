@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Portal de Pagos | Factura Digital</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #e9f0fa;
+      font-family: 'Inter', sans-serif;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      max-width: 560px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 36px;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.02);
+      overflow: hidden;
+    }
+
+    .card-inner {
+      padding: 20px 22px 32px 22px;
+    }
+
+    /* Barra navegador */
+    .browser-bar {
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .browser-left i {
+      font-size: 1.1rem;
+      color: #5f6368;
+    }
+    .browser-center {
+      background: #f2f3f7;
+      padding: 5px 14px;
+      border-radius: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #1e2a3a;
+    }
+    .browser-center i {
+      font-size: 0.7rem;
+    }
+    .browser-center span {
+      color: #3c4b5c;
+    }
+    .browser-right {
+      width: 24px;
+    }
+
+    /* Identidad: contrato a la izquierda, nombre centrado, botón nuevo a la derecha */
+    .identity-container {
+      background: #F0F6FE;
+      border-radius: 24px;
+      padding: 12px 18px;
+      margin: 20px 0 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .contract-number {
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: #e4edf8;
+      padding: 5px 14px;
+      border-radius: 40px;
+      color: #0b5c8a;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .editable-name {
+      flex: 1;
+      text-align: center;
+      min-width: 160px;
+    }
+    .editable-name input {
+      font-weight: 600;
+      font-size: 1.05rem;
+      border: none;
+      background: transparent;
+      color: #0b5c8a;
+      width: 100%;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      padding: 5px 0;
+      border-bottom: 1px dashed #98c1e0;
+      text-transform: uppercase;
+    }
+    .editable-name input::placeholder {
+      text-transform: none;
+      color: #8aaec9;
+      font-size: 0.85rem;
+      font-weight: 400;
+      opacity: 0.8;
+      text-align: center;
+    }
+    .editable-name input:focus {
+      border-bottom: 2px solid #0f6b9e;
+    }
+    .btn-nuevo {
+      background: #2d6a4f;
+      border: none;
+      border-radius: 40px;
+      padding: 6px 16px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: white;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .btn-nuevo:hover {
+      background: #1f543e;
+      transform: scale(1.02);
+    }
+
+    /* 3 columnas - Se cambia "TASA BCV" por "Tasa" */
+    .balance-row {
+      display: flex;
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      border: 1px solid #edf2f7;
+      margin-bottom: 28px;
+      flex-wrap: nowrap;
+    }
+    .balance-col {
+      flex: 1;
+      text-align: center;
+      padding: 12px 6px;
+    }
+    .balance-col:not(:last-child) {
+      border-right: 1px solid #e6edf4;
+    }
+    .balance-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.4px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .balance-amount {
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.2;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+    .col-usd .balance-title { color: #2c3e50; }
+    .col-usd .balance-amount { color: #121926; }
+    .col-tasa .balance-title { color: #e67e22; }
+    .col-tasa .balance-amount { color: #e67e22; }
+    .col-total .balance-title { color: #2e7d64; }
+    .col-total .balance-amount { color: #2e7d64; }
+    .editable-input {
+      font-weight: 800;
+      font-size: 1rem;
+      width: auto;
+      max-width: 85px;
+      text-align: center;
+      border: none;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      outline: none;
+      padding: 0;
+      display: inline;
+      color: inherit;
+    }
+    .col-tasa .editable-input {
+      color: #e67e22;
+    }
+    .currency-symbol {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-left: 2px;
+    }
+    .total-readonly {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #2e7d64;
+      display: inline;
+    }
+
+    /* Factura */
+    .invoice-card {
+      background: white;
+      border: 1px solid #eef3fc;
+      border-radius: 28px;
+      padding: 16px 18px;
+      margin-bottom: 24px;
+    }
+    .invoice-header-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+    }
+    .ver-detalles-btn {
+      background: none;
+      border: none;
+      color: #1e7bb0;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ver-detalles-btn:hover {
+      text-decoration: underline;
+    }
+    .invoice-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .invoice-left {
+      display: flex;
+      gap: 12px;
+      flex: 1;
+    }
+    .invoice-left input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #289b6f;
+      margin-top: 2px;
+    }
+    .invoice-info {
+      line-height: 1.4;
+      flex: 1;
+    }
+    .invoice-num {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #1f2e3a;
+    }
+    .invoice-dates {
+      font-size: 0.7rem;
+      color: #8a99aa;
+      margin: 4px 0 6px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .invoice-monto-sm {
+      font-size: 0.7rem;
+      font-weight: 500;
+      background: #f5f9fe;
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 24px;
+      color: #2c3e50;
+    }
+    .invoice-monto-sm span {
+      font-weight: 700;
+    }
+    .due-date-red {
+      color: #cc3b3b;
+      font-weight: 600;
+    }
+
+    /* Panel detalles */
+    .detalles-panel {
+      background: #f8fafd;
+      border-radius: 20px;
+      padding: 16px;
+      margin-top: 16px;
+      border-left: 3px solid #289b6f;
+      display: none;
+    }
+    .detalles-panel.show {
+      display: block;
+    }
+    .detalle-fila {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .detalle-fila:last-child {
+      border-bottom: none;
+    }
+    .detalle-label {
+      font-weight: 500;
+      color: #4a5b6e;
+    }
+    .detalle-valor {
+      font-weight: 700;
+      color: #1e2a3a;
+    }
+
+    /* Pago Móvil - toggle */
+    .pago-movil-toggle {
+      background: #eaf7ef;
+      border: 1px solid #c8e6d9;
+      border-radius: 28px;
+      margin-bottom: 28px;
+    }
+    .pago-movil-btn {
+      width: 100%;
+      background: #2d6a4f;
+      border: none;
+      padding: 14px;
+      border-radius: 28px;
+      font-weight: 800;
+      font-size: 1rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .pago-movil-contenido {
+      padding: 0 18px 20px 18px;
+      display: none;
+    }
+    .pago-movil-contenido.show {
+      display: block;
+    }
+    .datos-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #cfe3d6;
+    }
+    .datos-label {
+      font-weight: 600;
+      color: #2d493a;
+    }
+    .datos-value {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+      color: #1e2a3a;
+    }
+    .copy-icon {
+      color: #2e7d64;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.1s;
+    }
+    .copy-icon:hover {
+      color: #145c46;
+    }
+    .btn-copy-movil {
+      background: #2d6a4f;
+      border: none;
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 44px;
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Monto final + compartir */
+    .monto-final {
+      text-align: center;
+      margin: 16px 0 24px;
+    }
+    .monto-label {
+      font-weight: 500;
+      color: #5c6f87;
+      font-size: 0.75rem;
+    }
+    .monto-grande {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #1f543e;
+      margin-top: 6px;
+    }
+    .share-btn {
+      background: #25D366;
+      border: none;
+      width: 100%;
+      padding: 14px;
+      border-radius: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: 0.2s;
+    }
+    .footer-custom {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #7a8fa8;
+      margin-top: 20px;
+      padding-top: 12px;
+      border-top: 1px solid #edf2f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e2a36e6;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    @media (max-width: 480px) {
+      .card-inner { padding: 16px; }
+      .balance-amount, .editable-input, .total-readonly { font-size: 0.9rem; }
+      .balance-title { font-size: 0.55rem; }
+      .monto-grande { font-size: 1.8rem; }
+      .editable-input { max-width: 70px; }
+      .editable-name input { font-size: 0.95rem; }
+      .btn-nuevo { padding: 4px 12px; font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Barra navegador -->
+  <div class="browser-bar">
+    <div class="browser-left"><i class="fas fa-times"></i></div>
+    <div class="browser-center">
+      <i class="fab fa-whatsapp"></i>
+      <span>WhatsApp</span>
+      <i class="fas fa-lock" style="font-size: 0.65rem;"></i>
+      <span>portal.com.ve</span>
+    </div>
+    <div class="browser-right"></div>
+  </div>
+
+  <div class="card-inner">
+    <!-- Identidad: contrato a la izquierda, nombre centrado, botón nuevo a la derecha -->
+    <div class="identity-container">
+      <div class="contract-number" id="contractNumberDisplay">Cliente - #0000000</div>
+      <div class="editable-name">
+        <input type="text" id="clientNameInput" placeholder="Ingresar nombre del cliente" autocomplete="off">
+      </div>
+      <button class="btn-nuevo" id="btnNuevoCliente"><i class="fas fa-plus-circle"></i> Nuevo</button>
+    </div>
+
+    <!-- Columnas de saldos - se cambia título de "TASA BCV" a "Tasa" -->
+    <div class="balance-row">
+      <div class="balance-col col-usd">
+        <div class="balance-title">DEUDA USD</div>
+        <div class="balance-amount">
+          <input type="number" step="0.01" id="usdAmount" class="editable-input usd-input" value="0.00">
+          <span class="currency-symbol">$</span>
+        </div>
+      </div>
+      <div class="balance-col col-tasa">
+        <div class="balance-title">Tasa</div>
+        <div class="balance-amount">
+          <input type="number" step="0.01" id="tasaBcv" class="editable-input tasa-input" value="0.00">
+          <span class="currency-symbol">BS</span>
+        </div>
+      </div>
+      <div class="balance-col col-total">
+        <div class="balance-title">TOTAL BS</div>
+        <div class="balance-amount">
+          <span class="total-readonly" id="totalBsDisplay">0,00</span>
+          <span class="currency-symbol">BS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Factura -->
+    <div class="invoice-card">
+      <div class="invoice-header-row">
+        <button class="ver-detalles-btn" id="verDetallesBtn"><i class="fas fa-info-circle"></i> VER DETALLES</button>
+      </div>
+      <div class="invoice-item">
+        <div class="invoice-left">
+          <input type="checkbox" checked id="facturaCheckbox">
+          <div class="invoice-info">
+            <div class="invoice-num" id="invoiceNumberLabel">#0000000 - Factura</div>
+            <div class="invoice-dates">
+              <span id="emisionDate">Emisión: --</span>
+              <span class="due-date-red" id="dueDateLabel">Vence: --</span>
+            </div>
+            <div class="invoice-monto-sm" id="invoiceSmallAmounts">
+              <span>$0.00</span> | <span>0,00 BS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="detallesPanel" class="detalles-panel">
+        <div class="detalle-fila"><span class="detalle-label">Cliente:</span><span class="detalle-valor" id="detalleContrato">#0000000</span></div>
+        <div class="detalle-fila"><span class="detalle-label">Nombre:</span><span class="detalle-valor" id="detalleCliente">—</span></div>
+        <div class="detalle-fila"><span class="detalle-label">Emisión:</span><span class="detalle-valor" id="detalleEmision">--</span></div>
+        <div class="detalle-fila"><span class="detalle-label">Vence:</span><span class="detalle-valor" id="detalleVence">--</span></div>
+        <div class="detalle-fila"><span class="detalle-label">Monto USD:</span><span class="detalle-valor" id="detalleUsd">$0.00</span></div>
+        <div class="detalle-fila"><span class="detalle-label">Monto BS:</span><span class="detalle-valor" id="detalleBs">0,00 BS</span></div>
+        <div class="detalle-fila"><span class="detalle-label">Tasa:</span><span class="detalle-valor" id="detalleTasa">0,00 BS</span></div>
+      </div>
+    </div>
+
+    <!-- Pago Móvil -->
+    <div class="pago-movil-toggle">
+      <button class="pago-movil-btn" id="togglePagoMovilBtn"><i class="fas fa-mobile-alt"></i> Ver Pago Móvil</button>
+      <div id="pagoMovilContenido" class="pago-movil-contenido">
+        <div class="datos-row">
+          <span class="datos-label">Banco:</span>
+          <span class="datos-value"><strong>Provincial — 0108</strong></span>
+        </div>
+        <div class="datos-row">
+          <span class="datos-label">CI:</span>
+          <span class="datos-value">
+            <span id="ciValue">5806915</span>
+            <i class="fas fa-copy copy-icon" id="copyCiBtn"></i>
+          </span>
+        </div>
+        <div class="datos-row">
+          <span class="datos-label">Teléfono:</span>
+          <span class="datos-value">
+            <span id="phoneValue">+58 412 0780889</span>
+            <i class="fas fa-copy copy-icon" id="copyPhoneBtn"></i>
+          </span>
+        </div>
+        <button class="btn-copy-movil" id="copyPagoMovilBtn"><i class="fas fa-clipboard-list"></i> COPIAR PAGO MÓVIL</button>
+      </div>
+    </div>
+
+    <!-- Monto a pagar -->
+    <div class="monto-final">
+      <div class="monto-label">MONTO A PAGAR</div>
+      <div class="monto-grande" id="montoFinalBs">0,00 BS</div>
+    </div>
+    <button class="share-btn" id="compartirBtn"><i class="fab fa-whatsapp"></i> Compartir</button>
+    
+    <div class="footer-custom">
+      <i class="fas fa-file-invoice-dollar"></i> Portal de Pagos • Factura Digital
+    </div>
+  </div>
+</div>
+
+<script>
+  // -------- HELPER FUNCTIONS ----------
+  function formatNumberBs(value) {
+    if (isNaN(value)) value = 0;
+    let rounded = Math.round(value * 100) / 100;
+    let [integerPart, decimalPart] = rounded.toFixed(2).split('.');
+    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `${integerPart},${decimalPart}`;
+  }
+
+  function getFullBsString(value) {
+    return formatNumberBs(value) + " BS";
+  }
+
+  function formatUsd(value) {
+    return `$${parseFloat(value).toFixed(2)}`;
+  }
+
+  function getTodayDate() {
+    let today = new Date();
+    let yyyy = today.getFullYear();
+    let mm = String(today.getMonth() + 1).padStart(2, '0');
+    let dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  function getDueDateFromEmission(emissionDateStr) {
+    let parts = emissionDateStr.split('-');
+    let dateObj = new Date(parts[0], parts[1]-1, parts[2]);
+    dateObj.setDate(dateObj.getDate() + 5);
+    let yyyy = dateObj.getFullYear();
+    let mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    let dd = String(dateObj.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function generateRandomContractRaw() {
+    return Math.floor(1 + Math.random() * 9999999);
+  }
+  function formatContractNumber(rawNum) {
+    return String(rawNum).padStart(7, '0');
+  }
+  function getContractDisplay(rawNum) {
+    return `Cliente - #${formatContractNumber(rawNum)}`;
+  }
+
+  // DOM elements
+  const contractSpan = document.getElementById('contractNumberDisplay');
+  const invoiceNumSpan = document.getElementById('invoiceNumberLabel');
+  const usdInput = document.getElementById('usdAmount');
+  const tasaInput = document.getElementById('tasaBcv');
+  const totalBsSpan = document.getElementById('totalBsDisplay');
+  const montoFinalSpan = document.getElementById('montoFinalBs');
+  const invoiceSmallAmounts = document.getElementById('invoiceSmallAmounts');
+  const emisionSpan = document.getElementById('emisionDate');
+  const dueDateSpan = document.getElementById('dueDateLabel');
+  const clientNameInput = document.getElementById('clientNameInput');
+  
+  const detalleContrato = document.getElementById('detalleContrato');
+  const detalleCliente = document.getElementById('detalleCliente');
+  const detalleEmision = document.getElementById('detalleEmision');
+  const detalleVence = document.getElementById('detalleVence');
+  const detalleUsd = document.getElementById('detalleUsd');
+  const detalleBs = document.getElementById('detalleBs');
+  const detalleTasa = document.getElementById('detalleTasa');
+
+  const PAGO_CI = "5806915";
+  const PAGO_PHONE = "+58 412 0780889";
+
+  let currentContractRaw = 9776632;
+  let currentEmissionDate = getTodayDate();
+  let currentDueDate = getDueDateFromEmission(currentEmissionDate);
+
+  // --- Persistencia de la tasa usando localStorage ---
+  const STORAGE_KEY = 'ultima_tasa_bcv';
+  function saveTasaToStorage(tasaValue) {
+    localStorage.setItem(STORAGE_KEY, tasaValue);
+  }
+  function loadTasaFromStorage() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored !== null && !isNaN(parseFloat(stored))) {
+      return parseFloat(stored);
+    }
+    return 0.00;
+  }
+
+  function refreshAllUI() {
+    let usd = parseFloat(usdInput.value);
+    let tasa = parseFloat(tasaInput.value);
+    if (isNaN(usd)) usd = 0;
+    if (isNaN(tasa)) tasa = 0;
+    let totalBs = usd * tasa;
+    let totalFormattedNum = formatNumberBs(totalBs);
+    totalBsSpan.innerText = totalFormattedNum;
+    montoFinalSpan.innerText = getFullBsString(totalBs);
+    
+    let smallUsd = formatUsd(usd);
+    let smallBs = getFullBsString(totalBs);
+    invoiceSmallAmounts.innerHTML = `<span>${smallUsd}</span> | <span>${smallBs}</span>`;
+    
+    detalleUsd.innerHTML = formatUsd(usd);
+    detalleBs.innerHTML = getFullBsString(totalBs);
+    detalleTasa.innerHTML = `${tasa.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")} BS`;
+    
+    let clientName = clientNameInput.value.trim();
+    detalleCliente.innerHTML = clientName === "" ? "—" : clientName;
+    
+    detalleContrato.innerHTML = `#${formatContractNumber(currentContractRaw)}`;
+    detalleEmision.innerHTML = currentEmissionDate;
+    detalleVence.innerHTML = currentDueDate;
+  }
+
+  function syncContractAndInvoice() {
+    let padded = formatContractNumber(currentContractRaw);
+    contractSpan.innerText = getContractDisplay(currentContractRaw);
+    invoiceNumSpan.innerText = `#${padded} - Factura`;
+    detalleContrato.innerHTML = `#${padded}`;
+  }
+
+  function updateDatesUI() {
+    emisionSpan.innerText = `Emisión: ${currentEmissionDate}`;
+    dueDateSpan.innerText = `Vence: ${currentDueDate}`;
+    detalleEmision.innerHTML = currentEmissionDate;
+    detalleVence.innerHTML = currentDueDate;
+  }
+
+  function fullRefresh() {
+    refreshAllUI();
+    syncContractAndInvoice();
+    updateDatesUI();
+  }
+
+  // Nuevo cliente: limpia monto USD y nombre, PERO conserva la tasa actual (no se modifica)
+  // Además genera nuevo contrato y actualiza fechas.
+  function resetToNewClient() {
+    currentContractRaw = generateRandomContractRaw();
+    currentEmissionDate = getTodayDate();
+    currentDueDate = getDueDateFromEmission(currentEmissionDate);
+    syncContractAndInvoice();
+    updateDatesUI();
+    // Resetear solo USD y nombre, la tasa NO se toca
+    usdInput.value = "0.00";
+    clientNameInput.value = "";
+    // No modificar tasaInput.value
+    fullRefresh();
+    showToast(`Nuevo cliente creado • Contrato #${formatContractNumber(currentContractRaw)}`);
+  }
+
+  let toastTimeout;
+  function showToast(msg) {
+    let existing = document.querySelector('.toast-msg');
+    if(existing) existing.remove();
+    let toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    if(toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toast.remove(), 2500);
+  }
+
+  async function copyToClipboard(text, successMsg) {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(successMsg);
+    } catch (err) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showToast(successMsg);
+    }
+  }
+
+  // Eventos
+  usdInput.addEventListener('input', () => fullRefresh());
+  tasaInput.addEventListener('input', () => {
+    // Guardar en localStorage cada vez que cambie la tasa
+    let nuevaTasa = parseFloat(tasaInput.value);
+    if (!isNaN(nuevaTasa)) {
+      saveTasaToStorage(nuevaTasa);
+    }
+    fullRefresh();
+  });
+  clientNameInput.addEventListener('input', () => {
+    clientNameInput.value = clientNameInput.value.toUpperCase();
+    refreshAllUI();
+  });
+
+  const detallesPanel = document.getElementById('detallesPanel');
+  const verDetallesBtn = document.getElementById('verDetallesBtn');
+  verDetallesBtn.addEventListener('click', () => {
+    detallesPanel.classList.toggle('show');
+    fullRefresh();
+  });
+
+  // Botón Nuevo: resetea USD y nombre, mantiene tasa, nuevo contrato y fechas
+  const btnNuevo = document.getElementById('btnNuevoCliente');
+  btnNuevo.addEventListener('click', () => resetToNewClient());
+
+  // Pago Móvil toggle
+  const togglePagoBtn = document.getElementById('togglePagoMovilBtn');
+  const pagoContenido = document.getElementById('pagoMovilContenido');
+  togglePagoBtn.addEventListener('click', () => {
+    pagoContenido.classList.toggle('show');
+  });
+
+  document.getElementById('copyCiBtn').addEventListener('click', () => copyToClipboard(PAGO_CI, "CI copiado ✅"));
+  document.getElementById('copyPhoneBtn').addEventListener('click', () => copyToClipboard(PAGO_PHONE, "Teléfono copiado ✅"));
+  
+  document.getElementById('copyPagoMovilBtn').addEventListener('click', () => {
+    let usd = parseFloat(usdInput.value);
+    let tasa = parseFloat(tasaInput.value);
+    let totalBs = (usd * tasa).toFixed(2);
+    let totalFormatted = formatNumberBs(parseFloat(totalBs));
+    let textMovil = `Pago Móvil\nBanco: Provincial — 0108\nCI: ${PAGO_CI}\nTeléfono: ${PAGO_PHONE}\nMonto a pagar: ${totalFormatted} BS\nConcepto: Factura #${formatContractNumber(currentContractRaw)}`;
+    copyToClipboard(textMovil, "Datos de Pago Móvil copiados ✅");
+  });
+
+  // Botón Compartir - mensaje mantiene "Tasa del día:" según requerimiento
+  document.getElementById('compartirBtn').addEventListener('click', () => {
+    const name = clientNameInput.value.trim() || "Cliente";
+    const usdVal = parseFloat(usdInput.value).toFixed(2);
+    const tasaVal = parseFloat(tasaInput.value).toFixed(2);
+    const totalBsCalc = (parseFloat(usdVal) * parseFloat(tasaVal)).toFixed(2);
+    const totalFormatted = formatNumberBs(parseFloat(totalBsCalc));
+    const contratoMostrar = `#${formatContractNumber(currentContractRaw)}`;
+    
+    const mensaje = `📄 *Recibo*\n\n` +
+                    `Cliente: ${contratoMostrar}\n` +
+                    `Nombre: ${name}\n` +
+                    `Monto: $${usdVal}\n` +
+                    `Tasa del día: ${tasaVal} BS\n\n` +
+                    `*Total a pagar en dólares: $${usdVal}*\n` +
+                    `*Total a Pagar en BS: ${totalFormatted} BS*\n\n` +
+                    `✅ Pago móvil:\n` +
+                    `Banco: Provincial — 0108\n` +
+                    `CI: ${PAGO_CI}\n` +
+                    `Teléfono: ${PAGO_PHONE}\n\n` +
+                    `📌 *Nota:* Una vez realizado el pago, por favor comparte el comprobante para confirmar tu transacción.\n\n` +
+                    `Gracias por tu compra.`;
+    
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    window.open(waUrl, '_blank');
+    showToast("Información compartida sin cambios");
+  });
+
+  // Inicialización: montos en cero excepto la tasa que se recupera de localStorage
+  function init() {
+    // Cargar tasa guardada
+    let storedTasa = loadTasaFromStorage();
+    if (storedTasa !== 0.00) {
+      tasaInput.value = storedTasa.toFixed(2);
+    } else {
+      tasaInput.value = "0.00";
+    }
+    // Forzar USD a cero
+    usdInput.value = "0.00";
+    clientNameInput.value = "";
+    // Generar contrato y fechas
+    currentContractRaw = generateRandomContractRaw();
+    currentEmissionDate = getTodayDate();
+    currentDueDate = getDueDateFromEmission(currentEmissionDate);
+    syncContractAndInvoice();
+    updateDatesUI();
+    fullRefresh();
+  }
+  init();
+  
+  document.getElementById('facturaCheckbox').addEventListener('change', () => {});
+</script>
+</body>
+</html>
